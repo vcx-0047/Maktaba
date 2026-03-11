@@ -33,7 +33,6 @@ class BookRepository {
         Book(isbn = "9780470087251", title = "Professional Web APIs with PHP", nbPages = 356),
         Book(isbn = "9780071605502", title = "MySQL Database Usage & Administration", nbPages =500 ),
         Book(isbn = "9780596555139", title = "Linux System Programming", nbPages =392 )
-
     )
 
     /**
@@ -53,7 +52,6 @@ class BookRepository {
      * @return List of all books
      */
     fun getAllBooks(): List<Book> {
-//        add api call
         return booksList
     }
 
