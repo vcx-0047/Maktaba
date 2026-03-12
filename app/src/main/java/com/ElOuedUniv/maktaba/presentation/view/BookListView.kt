@@ -115,7 +115,7 @@ fun BookItem(book: Book) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = if (book.isbn.isEmpty()) "Not set" else book.isbn,
+                        text = book.isbn.ifEmpty { "Not set" },
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
