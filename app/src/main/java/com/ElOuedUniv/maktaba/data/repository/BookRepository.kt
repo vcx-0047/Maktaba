@@ -1,11 +1,15 @@
 package com.ElOuedUniv.maktaba.data.repository
 
 import com.ElOuedUniv.maktaba.data.model.Book
+import kotlinx.coroutines.flow.Flow
 
 interface BookRepository {
     
-    fun getAllBooks(): List<Book>
+    fun getAllBooks(): Flow<List<Book>>
     
     fun getBookByIsbn(isbn: String): Book?
-}
 
+    suspend fun addBook(book: Book)
+
+    suspend fun uploadBookCover(isbn: String, imageBytes: ByteArray): String
+}

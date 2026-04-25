@@ -1,17 +1,22 @@
 package com.ElOuedUniv.maktaba.presentation.book.add
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ElOuedUniv.maktaba.data.model.Book
 import com.ElOuedUniv.maktaba.domain.usecase.AddBookUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class AddBookViewModel @Inject constructor(
-    private val addBookUseCase: AddBookUseCase
+    private val addBookUseCase: AddBookUseCase,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(AddBookUiState())
@@ -35,6 +40,9 @@ class AddBookViewModel @Inject constructor(
                 if (_uiState.value.isFormValid) {
                     addBook()
                 }
+            }
+            is AddBookUiAction.OnCoverImageSelected -> {
+                _uiState.update { it.copy(coverImageUri = action.uri) }
             }
         }
     }
@@ -61,12 +69,25 @@ class AddBookViewModel @Inject constructor(
 
     private fun addBook() {
         val currentState = _uiState.value
-        val book = Book(
-            isbn = currentState.isbn,
-            title = currentState.title,
-            nbPages = currentState.nbPages.toIntOrNull() ?: 0
-        )
-        addBookUseCase(book)
-        _uiState.update { it.copy(isSuccess = true) }
+        _uiState.update { it.copy(isLoading = true) }
+        
+        viewModelScope.launch {
+            try {
+                val imageBytes = currentState.coverImageUri?.let { uri ->
+                    context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+                }
+                
+                val book = Book(
+                    isbn = currentState.isbn,
+                    title = currentState.title,
+                    nbPages = currentState.nbPages.toIntOrNull() ?: 0
+                )
+                
+                addBookUseCase(book, imageBytes)
+                _uiState.update { it.copy(isSuccess = true, isLoading = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+            }
+        }
     }
 }

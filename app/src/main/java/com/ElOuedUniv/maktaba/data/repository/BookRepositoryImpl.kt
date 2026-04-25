@@ -31,8 +31,12 @@ class BookRepositoryImpl @Inject constructor() : BookRepository {
         return _booksList.find { it.isbn == isbn }
     }
 
-    override fun addBook(book: Book) {
+    override suspend fun addBook(book: Book) {
         _booksList.add(book)
         booksFlow.tryEmit(_booksList.toList())
+    }
+
+    override suspend fun uploadBookCover(isbn: String, imageBytes: ByteArray): String {
+        return "https://via.placeholder.com/200"
     }
 }

@@ -7,7 +7,11 @@ import javax.inject.Inject
 class AddBookUseCase @Inject constructor(
     private val bookRepository: BookRepository
 ) {
-    operator fun invoke(book: Book) {
-        bookRepository.addBook(book)
+    suspend operator fun invoke(book: Book, imageBytes: ByteArray? = null) {
+        val imageUrl = imageBytes?.let {
+            bookRepository.uploadBookCover(book.isbn, it)
+        }
+        val finalBook = if (imageUrl != null) book.copy(imageUrl = imageUrl) else book
+        bookRepository.addBook(finalBook)
     }
 }

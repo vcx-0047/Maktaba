@@ -2,61 +2,54 @@ package com.ElOuedUniv.maktaba.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.ElOuedUniv.maktaba.ui.addbook.AddBookScreen
-import com.ElOuedUniv.maktaba.ui.bookdetail.BookDetailScreen
-import com.ElOuedUniv.maktaba.ui.booklist.BookListScreen
-import com.ElOuedUniv.maktaba.ui.category.CategoryExplorerScreen
+import com.ElOuedUniv.maktaba.presentation.book.BookListView
+import com.ElOuedUniv.maktaba.presentation.book.add.AddBookView
+import com.ElOuedUniv.maktaba.presentation.book.detail.BookDetailView
+import com.ElOuedUniv.maktaba.presentation.category.CategoryListView
+import com.ElOuedUniv.maktaba.presentation.onboarding.OnboardingView
 
 @Composable
 fun NavGraph(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.BookList.route
+    startDestination: String
 ) {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(Screen.BookList.route) {
-            BookListScreen(
-                onBookClick = { bookId ->
-                    navController.navigate(Screen.BookDetail.createRoute(bookId))
-                },
-                onAddBookClick = {
-                    navController.navigate(Screen.AddBook.route)
-                },
-                onCategoryClick = {
-                    navController.navigate(Screen.CategoryExplorer.route)
+        composable(Screen.Onboarding.route) {
+            OnboardingView(
+                onNavigateToLibrary = {
+                    navController.navigate(Screen.BookList.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
                 }
             )
         }
-
-        composable(
-            route = Screen.BookDetail.route,
-            arguments = listOf(navArgument("bookId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val bookId = backStackEntry.arguments?.getInt("bookId") ?: return@composable
-            BookDetailScreen(
-                bookId = bookId,
-                onBackClick = { navController.popBackStack() }
+        
+        composable(Screen.BookList.route) {
+            BookListView(
+                onCategoriesClick = { navController.navigate(Screen.CategoryList.route) },
+                onAddBookClick = { navController.navigate(Screen.AddBook.route) },
+                onBookClick = { isbn -> 
+                    navController.navigate(Screen.BookDetail.createRoute(isbn))
+                }
             )
         }
-
-        composable(Screen.CategoryExplorer.route) {
-            CategoryExplorerScreen(
-                onBackClick = { navController.popBackStack() }
-            )
+        
+        composable(Screen.BookDetail.route) {
+            BookDetailView(onBackClick = { navController.popBackStack() })
         }
-
+        
+        composable(Screen.CategoryList.route) {
+            CategoryListView(onBackClick = { navController.popBackStack() })
+        }
+        
         composable(Screen.AddBook.route) {
-            AddBookScreen(
-                onCancel = { navController.popBackStack() },
-                onSuccess = { navController.popBackStack() }
-            )
+            AddBookView(onBackClick = { navController.popBackStack() })
         }
     }
 }
